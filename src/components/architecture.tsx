@@ -18,7 +18,7 @@ const nodes = [
 const notes = {
   screen: { title: "화면 · 브라우저에서 시작되는 고민", text: "송출과 시청 화면은 모바일 회전과 화면 크기 변화에 어떻게 대응해야 할까요?", slug: "mobile-canvas" },
   connection: { title: "인증부터 방송 연결까지, 상태를 일관되게", text: "토큰 발급, 방송 승인, 연결과 재할당 사이에서 이전 방송의 이벤트가 도착하면 어떻게 처리할까요?", slug: "player-state" },
-  recording: { title: "녹화 저장에서 다시 보기까지", text: "분할 저장된 녹화를 하나의 재생목록으로 연결하고 삭제·실패 상태를 어떻게 보여줄까요?", slug: "recording-playlist" },
+  recording: { title: "VOD 재생 대기 시간과 파일 관리", text: "작은 TS 파일이 늘어나는 부담을 줄이면서 필요한 재생 구간만 가져올 수 있을까요?", slug: "vod-byte-range" },
 };
 
 const edges = [
