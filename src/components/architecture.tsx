@@ -1,6 +1,67 @@
 "use client";
-import {useState} from "react";
+
+import { useId, useState } from "react";
 import Link from "next/link";
-const nodes=[{name:"화면 · 모바일",sub:"레이아웃 · 인터랙션",col:1,row:2,id:"canvas"},{name:"IAM / WAS",sub:"토큰 · 방송 승인",col:2,row:1,id:"player"},{name:"Player",sub:"연결 · 전환 · 오류",col:2,row:2,id:"player"},{name:"Canvas",sub:"좌표 · 크기 · 렌더링",col:3,row:2,id:"canvas"},{name:"Gateway",sub:"WebRTC 라이브",col:4,row:1,id:"player"},{name:"녹화 / CDN",sub:"재생목록 · HLS",col:4,row:3,id:"playlist"}];
-const notes:Record<string,{title:string;text:string;slug:string}>={player:{title:"01 — 플레이어 상태와 전환",text:"새 방송을 선택한 뒤 이전 연결의 이벤트가 도착하면 어떻게 처리할까요?",slug:"player-state"},canvas:{title:"02 — 모바일 화면과 Canvas",text:"화면이 회전해도 그린 위치와 선명도를 유지하려면 무엇을 분리해야 할까요?",slug:"mobile-canvas"},playlist:{title:"03 — 분할된 녹화의 시청 경험",text:"여러 녹화 파일과 삭제·실패 상태를 하나의 플레이어에서 어떻게 보여줄까요?",slug:"recording-playlist"}};
-export default function Architecture(){const[selected,setSelected]=useState("player");const n=notes[selected];return <div className="architecture"><div className="diagram-scroll"><div className="diagram"><svg viewBox="0 0 900 330" preserveAspectRatio="none" aria-hidden="true"><path d="M 190 165 H 270 M 410 165 H 490 M 337 85 V 125 M 410 165 H 455 V 55 H 730 M 410 165 H 455 V 275 H 730" fill="none" stroke="#a7b7bb" strokeWidth="1.5" strokeDasharray="5 4"/></svg><span className="edge-label edge-stream">WebRTC</span><span className="edge-label edge-record">HLS</span>{nodes.map((node,i)=><button key={node.name} onClick={()=>setSelected(node.id)} aria-pressed={selected===node.id} className={`system-node ${selected===node.id?"selected":""}`} style={{gridColumn:node.col,gridRow:node.row}}><span className="node-index">0{i+1}<span>↗</span></span><strong>{node.name}</strong><small>{node.sub}</small></button>)}</div></div><div className="diagram-note" aria-live="polite"><div><span className="eyebrow">CONNECTED QUESTION</span><h3>{n.title}</h3><p>{n.text}</p></div><Link href={`/cases/${n.slug}/`}>고민 따라가기 <span>→</span></Link></div></div>}
+
+const nodes = [
+  { key: "browser", name: "화면 · 브라우저", sub: "송출자 클라이언트", x: 40, y: 250, question: "screen", browser: true },
+  { key: "iam", name: "IAM", sub: "인증 · 토큰 발급", x: 40, y: 70, question: "connection" },
+  { key: "db", name: "DB", sub: "사이트 · 방송 · 세션 정보", x: 340, y: 70, question: "connection" },
+  { key: "was", name: "WAS", sub: "방송 승인 · 세션 관리", x: 340, y: 250, question: "connection" },
+  { key: "gateway", name: "Gateway", sub: "연결 · 채팅 · 상태 전달", x: 640, y: 250, question: "connection" },
+  { key: "viewer", name: "화면 · 브라우저", sub: "시청자 클라이언트", x: 940, y: 250, question: "screen", browser: true },
+  { key: "janus", name: "Janus", sub: "영상 송출 · 세션 모니터링", x: 340, y: 450, question: "connection" },
+  { key: "s3", name: "S3", sub: "녹화 파일 저장", x: 640, y: 450, question: "recording" },
+  { key: "cdn", name: "CDN", sub: "HLS 영상 전달", x: 940, y: 450, question: "recording" },
+] as const;
+
+const notes = {
+  screen: { title: "화면 · 브라우저에서 시작되는 고민", text: "송출과 시청 화면은 모바일 회전과 화면 크기 변화에 어떻게 대응해야 할까요?", slug: "mobile-canvas" },
+  connection: { title: "인증부터 방송 연결까지, 상태를 일관되게", text: "토큰 발급, 방송 승인, 연결과 재할당 사이에서 이전 방송의 이벤트가 도착하면 어떻게 처리할까요?", slug: "player-state" },
+  recording: { title: "녹화 저장에서 다시 보기까지", text: "분할 저장된 녹화를 하나의 재생목록으로 연결하고 삭제·실패 상태를 어떻게 보여줄까요?", slug: "recording-playlist" },
+};
+
+const edges = [
+  { d: "M 130 250 V 170", label: "01 토큰 요청 · 발급", x: 144, y: 210, type: "control", side: true },
+  { d: "M 220 120 H 340", label: "사이트 · 인증 정보", x: 280, y: 108, type: "control" },
+  { d: "M 430 250 V 170", label: "방송 · 세션 정보", x: 444, y: 210, type: "control", side: true },
+  { d: "M 220 280 H 340", label: "02 방송 승인", x: 280, y: 267, type: "control" },
+  { d: "M 340 320 H 220", label: "대기 · 재할당", x: 280, y: 343, type: "control" },
+  { d: "M 520 280 H 640", label: "방송 (재)할당", x: 580, y: 267, type: "control" },
+  { d: "M 640 320 H 520", label: "연결 상태", x: 580, y: 343, type: "control" },
+  { d: "M 730 250 V 120 H 520", label: "채팅 · 참여 이력 / Gateway 상태", x: 744, y: 191, type: "control", side: true },
+  { d: "M 175 350 V 390 H 685 V 350", label: "03 방송 연결 · 채팅 · 참여자 상태", x: 405, y: 380, type: "control" },
+  { d: "M 820 280 H 940", label: "05 Streaming", x: 880, y: 267, type: "live" },
+  { d: "M 940 320 H 820", label: "채팅", x: 880, y: 343, type: "control" },
+  { d: "M 130 350 V 500 H 340", label: "04 WebRTC 영상 송출", x: 235, y: 488, type: "live" },
+  { d: "M 520 480 H 590 V 350 H 685", label: "방송 개설 · 폐기 모니터링", x: 430, y: 425, type: "control" },
+  { d: "M 730 350 V 450", label: "06 Recording", x: 744, y: 425, type: "record", side: true },
+  { d: "M 940 520 H 900 V 565 H 85 V 350", label: "07 HLS 재생 · CDN → 브라우저", x: 480, y: 585, type: "record" },
+  { d: "M 820 500 H 940", label: "녹화 파일", x: 880, y: 488, type: "record" },
+];
+
+export default function Architecture() {
+  const [selected, setSelected] = useState<(typeof nodes)[number]["key"]>("browser");
+  const id = useId().replace(/:/g, "");
+  const selectedNode = nodes.find((node) => node.key === selected)!;
+  const note = notes[selectedNode.question];
+  return (
+    <div className="architecture system-architecture">
+      <div className="map-toolbar"><span className="map-toolbar-title">BROADCAST SYSTEM <span>/ 전체 연결 구조</span></span><div className="flow-legend"><span><i className="control" />인증 · 제어</span><span><i className="live" />실시간 영상</span><span><i className="record" />녹화 · 재생</span></div></div>
+      <div className="system-scroll" role="region" aria-label="방송 시스템 설계도. 좁은 화면에서는 좌우로 스크롤할 수 있습니다." tabIndex={0}>
+        <div className="system-diagram">
+          <div className="map-zone zone-auth">01 / 인증 · 방송 관리</div><div className="map-zone zone-live">02 / 연결 · 실시간 방송</div><div className="map-zone zone-record">03 / 송출 · 녹화 · 다시 보기</div>
+          <svg viewBox="0 0 1160 610" className="system-connections" aria-hidden="true">
+            <defs>{["control", "live", "record"].map((type) => <marker key={type} id={`${id}-${type}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" className={`arrow-${type}`} /></marker>)}</defs>
+            {edges.map((edge) => <g key={edge.d} className={`system-edge edge-${edge.type}`}><path d={edge.d} markerStart={edge.d === "M 130 250 V 170" ? `url(#${id}-${edge.type})` : undefined} markerEnd={`url(#${id}-${edge.type})`} /><text x={edge.x} y={edge.y} textAnchor={"side" in edge ? "start" : "middle"}>{edge.label}</text></g>)}
+          </svg>
+          {nodes.map((node) => <button key={node.key} type="button" className={`map-node ${"browser" in node ? "map-browser" : ""} ${selected === node.key ? "is-selected" : ""}`} style={{ left: `${node.x / 11.6}%`, top: `${node.y / 6.1}%` }} onClick={() => setSelected(node.key)} aria-pressed={selected === node.key} aria-controls={`${id}-note`}>
+            {"browser" in node ? <span className="browser-chrome" aria-hidden="true"><i /><i /><i /><span /></span> : null}<strong>{node.name}</strong><small>{node.sub}</small><span className="map-node-link" aria-hidden="true">↗</span>
+          </button>)}
+        </div>
+      </div>
+      <div className="map-mobile-hint">← 좌우로 움직여 전체 설계도를 확인하세요 →</div>
+      <div className="diagram-note" id={`${id}-note`} aria-live="polite"><div><span className="eyebrow">{selectedNode.name} / CONNECTED QUESTION</span><h3>{note.title}</h3><p>{note.text}</p></div><Link href={`/cases/${note.slug}/`}>고민 따라가기 <span>→</span></Link></div>
+    </div>
+  );
+}
