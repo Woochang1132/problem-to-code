@@ -16,7 +16,7 @@ const nodes = [
 ] as const;
 
 const notes = {
-  screen: { title: "화면 · 브라우저에서 시작되는 고민", text: "송출과 시청 화면은 모바일 회전과 화면 크기 변화에 어떻게 대응해야 할까요?", slug: "mobile-canvas" },
+  screen: { title: "고화질보다 안정적인 재생을 선택한 이유", text: "1080p 구성에서 지연과 기기 부담이 커졌을 때, 왜 ABR을 유지하면서 최대 720p로 제한했을까요?", slug: "abr-quality-cap" },
   connection: { title: "인증부터 방송 연결까지, 상태를 일관되게", text: "토큰 발급, 방송 승인, 연결과 재할당 사이에서 이전 방송의 이벤트가 도착하면 어떻게 처리할까요?", slug: "player-state" },
   recording: { title: "VOD 재생 대기 시간과 파일 관리", text: "작은 TS 파일이 늘어나는 부담을 줄이면서 필요한 재생 구간만 가져올 수 있을까요?", slug: "vod-byte-range" },
 };
