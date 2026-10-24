@@ -17,7 +17,7 @@ const nodes = [
 
 const notes = {
   screen: { title: "고화질보다 안정적인 재생을 선택한 이유", text: "1080p 구성에서 지연과 기기 부담이 커졌을 때, 왜 ABR을 유지하면서 최대 720p로 제한했을까요?", slug: "abr-quality-cap" },
-  connection: { title: "인증부터 방송 연결까지, 상태를 일관되게", text: "토큰 발급, 방송 승인, 연결과 재할당 사이에서 이전 방송의 이벤트가 도착하면 어떻게 처리할까요?", slug: "player-state" },
+  connection: { title: "영상·음성 분리 뒤 재생 시점을 맞추는 방법", text: "분리한 영상·음성의 시간 차이를 어떻게 맞추고, 어긋났을 때 재생 화면과 버퍼링을 제어했을까요?", slug: "av-sync" },
   recording: { title: "VOD 재생 대기 시간과 파일 관리", text: "작은 TS 파일이 늘어나는 부담을 줄이면서 필요한 재생 구간만 가져올 수 있을까요?", slug: "vod-byte-range" },
 };
 
