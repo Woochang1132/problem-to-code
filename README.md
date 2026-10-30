@@ -1,6 +1,6 @@
-# Broadcast · Engineering Notes
+# Problem to Code · Engineering Notes
 
-방송 서비스 개발에서 마주한 상황과 제약, 고민과 선택의 이유를 기록하는 포트폴리오입니다.
+실시간 방송 플랫폼과 리만 글로벌 백오피스 개발에서 직접 맡은 일, 상황과 제약, 선택의 이유를 기록하는 포트폴리오입니다.
 
 ## 실행
 
@@ -31,8 +31,17 @@ npm run lint
 
 ## 내용 수정
 
+- `src/app/page.tsx`: 두 프로젝트 소개와 대표 항목을 보여주는 홈
+- `src/app/projects/broadcast/page.tsx`: 기존 방송 설계도와 사례 목록
+- `src/app/projects/riman/page.tsx`: 리만 백오피스 소개와 담당 업무
+- `src/data/riman.ts`: 회원·감사 로그·상품·주문·배송·배너 및 팝업의 구현 범위
+- `src/app/projects.css`: 홈과 프로젝트 챕터 스타일
+- `src/components/site-chrome.tsx`: 공통 헤더·푸터
+- `src/components/case-cards.tsx`: 방송 사례 카드
+
+방송 사례의 기존 `/cases/…/` 주소는 유지합니다. 리만 챕터는 회원용 쇼핑몰과 직접 개발한 관리자 시스템을 구분하며, 상세 의사결정 기록은 실제 경험을 추가한 뒤 작성합니다.
+
 - `src/data/cases.ts`: 사례 내용과 의사코드
-- `src/app/page.tsx`: 소개, 역할, 프로젝트 정보
 - `src/components/architecture.tsx`: 설계 지도와 연결된 사례
 - `src/data/architecture.ts`: 공개용 개념도와 상세 설계도 복호화
 - `src/data/architecture.encrypted.json`: 암호화한 기존 상세 설계도

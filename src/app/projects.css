@@ -1,0 +1,48 @@
+.project-section { border-top: 1px solid var(--line); padding: 32px 0 46px; }
+.project-grid, .scope-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.project-card { display: flex; flex-direction: column; padding: 30px; background: white; border: 1px solid var(--line); border-radius: 12px; }
+.project-card-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.project-card-heading .eyebrow { margin: 0; font-size: 10px; }
+.project-card-heading .tag { font-size: 10px; }
+.project-card h3 { font-size: 28px; line-height: 1.5; letter-spacing: -.9px; margin: 25px 0 14px; }
+.project-card h3 a:hover, .project-feature a:hover { color: var(--accent); }
+.project-card > p { font-size: 15px; color: var(--muted); margin: 0 0 16px; }
+.project-stack { font-size: 12px; color: var(--accent); margin-bottom: 26px; }
+.project-feature { margin-top: auto; padding: 20px; background: #f3f8f6; border: 1px solid #dcebe5; border-radius: 8px; }
+.project-feature .small-label { display: block; font-size: 10px; margin-bottom: 8px; }
+.project-feature > a { display: block; font-size: 17px; font-weight: 700; }
+.project-feature p { font-size: 13px; color: var(--muted); margin: 9px 0 0; }
+.project-open { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 700; color: var(--accent); }
+.chapter-intro .back-link { margin-bottom: 24px; }
+.service-context { padding: 30px; background: white; border: 1px solid var(--line); border-radius: 12px; }
+.service-context > div > p:last-child, .record-continuation > p { color: var(--muted); font-size: 15px; }
+.service-boundary { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+.service-boundary > div { padding: 20px; border: 1px solid var(--line); border-radius: 8px; }
+.service-boundary > div:last-child { background: var(--pale); border-color: #cde7de; }
+.service-boundary span, .service-boundary small { display: block; }
+.service-boundary a, .service-boundary strong { display: block; margin: 8px 0; font-size: 18px; }
+.service-boundary a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.service-boundary small { color: var(--muted); font-size: 12px; }
+.scope-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.scope-nav a { padding: 6px 12px; border: 1px solid var(--line); border-radius: 5px; font-size: 12px; background: white; }
+.scope-nav a:hover { color: var(--accent); border-color: var(--accent); }
+.scope-card { padding: 28px; background: white; border: 1px solid var(--line); border-radius: 10px; scroll-margin-top: 28px; }
+.scope-card:target { border-color: var(--accent); box-shadow: 0 0 0 3px #08796b12; }
+.scope-card .card-top { margin-bottom: 18px; }
+.scope-card h3 { font-size: 22px; margin: 0 0 12px; letter-spacing: -.5px; }
+.scope-card p { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+.scope-card ul { border-top: 1px solid var(--line); margin: 0; padding: 16px 0 0 20px; font-size: 13px; color: #425961; }
+.scope-card li { padding-left: 3px; margin: 6px 0; }
+.record-continuation { padding: 28px 30px; border: 1px dashed #b5cbc4; border-radius: 10px; background: #f1f7f4; }
+.record-continuation .eyebrow { color: var(--accent); font-size: 11px; }
+.chapter-next { padding: 0 0 30px; margin-top: 30px; font-size: 14px; color: var(--accent); }
+@media (max-width: 1000px) { .project-card { padding: 24px; } .project-card h3 { font-size: 25px; } }
+@media (max-width: 760px) {
+  .brand { font-size: 15px; gap: 7px; } .topbar > a:last-child { font-size: 12px; }
+  .project-grid, .scope-grid, .service-boundary { grid-template-columns: 1fr; gap: 18px; }
+  .project-card, .service-context, .scope-card, .record-continuation { padding: 22px; }
+  .project-card h3 { font-size: 25px; } .project-card-heading { gap: 10px; }
+  .project-feature { padding: 17px; } .project-open { font-size: 13px; }
+  .chapter-intro h1 { font-size: 32px; letter-spacing: -1.2px; }
+  .service-context h2, .record-continuation h2 { font-size: 22px; }
+}

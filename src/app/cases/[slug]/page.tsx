@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { cases } from "@/data/cases";
+import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 
 
 export function generateStaticParams() { return cases.map(c => ({ slug: c.slug })); }
@@ -20,9 +21,9 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
   const presentation = c.presentation;
 
   return <main className="shell">
-    <header className="topbar"><Link href="/" className="brand"><span className="brand-icon">B.</span> Broadcast<span className="brand-light"> / engineering notes</span></Link><Link href="/#cases">모든 기록 ↗</Link></header>
+    <SiteHeader />
     <div className="detail-header">
-      <Link className="back-link" href="/">← 전체 기록으로 돌아가기</Link>
+      <Link className="back-link" href="/projects/broadcast/#cases">← 방송 프로젝트의 전체 기록</Link>
       <div className="detail-tags"><span className="eyebrow" style={{ margin: 0 }}>{c.category}</span><span className="tag">{experience ? "구현 경험 · 본인 설명 기반" : "작성 예시 · 검증 전"}</span></div>
       <h1>{c.title}</h1><p className="intro-copy">{c.summary}</p>
       <div className="location-bar">관련 흐름 / {c.location}</div>
@@ -43,6 +44,6 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
         </section>
         <div className="case-nav">{cases.filter(x => x.slug !== slug).map(x => <Link key={x.slug} href={`/cases/${x.slug}/`}>{x.title} →</Link>)}</div>
       </article>
-    </div><footer><Link href="/">← Broadcast / Engineering Notes</Link><span>{experience ? "상황과 제약, 선택의 이유를 기록합니다." : "설계 기반 사례 초안"}</span></footer>
+    </div><SiteFooter />
   </main>;
 }
