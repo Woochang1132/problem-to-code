@@ -1,0 +1,30 @@
+.riman-records { padding: 38px 0 0; }
+.riman-record-list { display: grid; gap: 28px; }
+.riman-record { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; scroll-margin-top: 28px; }
+.riman-record:target { border-color: var(--accent); }
+.riman-record-heading { padding: 28px 30px; background: #f1f7f4; border-bottom: 1px solid #dcebe5; }
+.riman-record-heading .eyebrow { font-size: 10px; }
+.riman-record-heading h3 { font-size: 25px; letter-spacing: -.7px; line-height: 1.5; margin: 0 0 12px; }
+.riman-record-heading > p:last-child { font-size: 15px; color: var(--muted); margin: 0; max-width: 850px; }
+.riman-record-body { padding: 28px 30px; display: grid; gap: 26px; }
+.riman-record-body h4 { margin: 0 0 9px; font-size: 15px; }
+.riman-record-body p { margin: 0; font-size: 14px; color: #425961; }
+.riman-record-body ul { padding-left: 20px; margin: 0; font-size: 14px; color: #425961; }
+.riman-record-body ul li { margin: 7px 0; }
+.riman-flow { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0; margin: 14px 0 0; }
+.riman-flow li { padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: #fafcfc; }
+.riman-flow strong { display: block; font-size: 14px; margin: 7px 0; }
+.riman-flow li p { font-size: 12px; }
+.riman-tradeoff { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.riman-tradeoff > div { border: 1px solid var(--line); padding: 20px; border-radius: 8px; }
+.riman-tradeoff > div:first-child { background: var(--pale); border-color: #cde7de; }
+.riman-ownership { border-top: 1px solid var(--line); padding-top: 20px; }
+.riman-project-links { display: flex; flex-wrap: wrap; gap: 10px 24px; }
+.riman-project-links a { display: block; }
+@media (max-width: 1000px) { .riman-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .riman-record-heading, .riman-record-body { padding: 22px; }
+  .riman-record-heading h3 { font-size: 22px; }
+  .riman-flow, .riman-tradeoff { grid-template-columns: 1fr; }
+  .riman-records .section-heading > p { font-size: 12px; }
+}
