@@ -1,20 +1,80 @@
 export type CasePresentation = { titles?: Partial<Record<"context"|"reasoning"|"implementation"|"result",string>>; reasoningIntro?:string; codeTitle?:string; codeNote?:string; ownershipIntro?:string; highlights?:{label:string;value:string;note:string}[]; comparison?:{label:string;title:string;text:string;detail:string}[] };
 export type DecisionCase = {cardNote?:string;presentation?:CasePresentation;experience?:boolean;result?:string;references?:{label:string;url:string}[];slug:string;category:string;location:string;title:string;summary:string;tradeoff:string;fact:string;source:string;problem:string;investigate:string[];options:{name:string;good:string;cost:string;selected?:boolean}[];decision:string;steps:string[];code:string;checks:string[];limits:string;evidence:string[]};
 export const cases:DecisionCase[]=[{
-slug:"av-sync",category:"AUDIO / VIDEO SYNC",location:"FFmpeg · 커스텀 m3u8 메타데이터 → 별도 video / audio 요소",title:"영상과 음성을 나누고, 재생 시점을 다시 맞추다",summary:"영상·음성을 함께 담은 TS 구간의 로딩이 지연되면서 소리까지 늦어지는 문제를 완화하고자 스트림을 분리했습니다. VOD·Live 생성 시 기록한 시간 차이를 기준으로 별도 재생 요소를 동기화하고, 0.5초 기준으로 화면 표시와 재동기화를 제어했습니다.",tradeoff:"영상·음성의 독립 로딩 ↔ 두 재생 요소의 동기화 복잡도",experience:true,cardNote:"구현 경험 · 분리 로딩과 0.5초 동기화 기준",
-fact:"기존 서비스는 영상과 음성을 같은 TS 세그먼트에 담아 hls.js로 받아 재생했습니다. 상대적으로 큰 영상 데이터가 포함된 구간의 로딩이 지연될 때 소리도 늦어지는 현상을 겪었습니다. 이를 완화하고자 영상과 음성 파일을 분리하고 별도 video/audio 요소로 재생했습니다. FFmpeg를 이용한 VOD·Live 생성 과정에서 영상·음성의 시간 차이를 기록해 m3u8에 직접 추가한 메타데이터로 전달하고, 재생 시 이 값을 동기화 기준으로 사용했습니다.",source:"본인 구현 경험: 영상·음성 분리, 별도 video/audio 요소, 커스텀 m3u8 메타데이터, 초기 동기화와 0.5초 기준의 재동기화. 정확한 태그명과 보정 API는 추가 확인 항목입니다.",
-problem:"영상과 음성이 같은 로딩 경로를 공유하던 구조에서 영상 쪽 대기가 소리에도 영향을 주고 있었습니다. 파일과 요청을 분리하면 각자 로딩할 수 있지만, 이번에는 두 재생 요소가 서로 다른 시점에 시작하거나 버퍼링 후 어긋날 수 있었습니다. 목표는 파일을 나누는 데서 끝나지 않고, 사용자가 화면을 보기 시작할 때와 재생 도중에도 영상·음성이 맞도록 제어하는 것이었습니다.",
-investigate:["파일 크기 차이는 당시 로딩 부담을 설명하는 관찰입니다. 하나의 TS에 두 트랙이 있다고 항상 소리가 지연되는 것은 아니며, 실제 대기는 구간 길이·네트워크·다운로드 및 디코딩·버퍼 정책에도 영향을 받습니다.","서버에서 영상·음성 파일을 분리하는 것과 브라우저에서 재생 요소를 분리하는 것은 다른 결정입니다. 이번 서비스는 별도 video/audio 요소를 사용했기 때문에 두 요소 사이의 재생 제어도 필요했습니다. HLS가 언제나 이 구성을 요구하는 것은 아닙니다.","m3u8의 시간 차이 정보는 직접 추가한 메타데이터였습니다. 표준 HLS에 립싱크 오차를 자동으로 보정하는 전용 태그가 있다고 설명하지 않고, 서비스가 기록하고 해석한 동기화 정보로 구분했습니다.","처음 저장한 시간 차이는 두 트랙의 시작 기준을 맞추는 정보입니다. 재생 중 대기·탐색·속도 차이로 새롭게 벌어진 오차는 별도로 확인해야 합니다. 서로 다른 시간 원점을 가진 video/audio의 currentTime을 그대로 빼면 잘못된 비교가 될 수 있어 공통 타임라인 기준으로 해석해야 합니다.","0.5초는 당시 서비스가 정한 화면 노출·재동기화 기준입니다. 사람이 립싱크 차이를 느끼지 못하는 표준 허용 오차나, 재생 중 항상 보장한 실측 최대 오차를 뜻하지 않습니다."],
-options:[{name:"영상·음성을 담은 TS 구성 유지",good:"한 재생 요소 안에서 두 트랙을 다루는 구조 유지",cost:"당시 관찰한 로딩 지연과 소리 대기 문제를 별도로 해결해야 함"},{name:"파일 분리 후 각 요소를 바로 재생",good:"로딩을 분리하고 먼저 준비된 데이터부터 재생 가능",cost:"시작 시점과 버퍼링 이후 영상·음성이 어긋날 수 있음"},{name:"파일 분리 + 시간 기준 공유 + 재동기화",good:"독립 로딩을 활용하면서 화면 노출과 어긋남에 대응",cost:"메타데이터 관리, 재생·대기·탐색 제어와 동기화 복구가 복잡해짐",selected:true}],
-decision:"영상 로딩을 기다리느라 소리까지 늦어지는 현상을 완화하는 방향으로 파일을 분리하되, 두 요소를 준비되는 대로 무조건 재생하지는 않았습니다. 생성 시 기록한 영상·음성 시간 차이를 초기 기준으로 사용하고, 차이가 0.5초 이내로 들어오는 것을 확인한 뒤 재생 화면을 표시했습니다. 재생 중에도 차이가 0.5초 수준으로 벌어지면 버퍼링 표시로 전환하고, 시점을 다시 맞춘 뒤 재생하는 정책을 적용했습니다. 로딩 경로를 분리하는 이점과 동기화 제어 비용을 함께 받아들인 선택입니다.",
-steps:["FFmpeg를 이용해 VOD·Live 미디어를 생성하는 과정에서 영상과 음성을 분리하고, 두 트랙 사이의 시간 차이를 기록했습니다. 이 정보를 서비스용 커스텀 m3u8 메타데이터로 전달했습니다. FFmpeg 기본 옵션이 임의의 립싱크 태그를 자동 생성한다고 가정하지 않습니다.","재생 버튼을 눌러 파일을 로드할 때 커스텀 메타데이터를 읽고, 별도 video/audio 요소의 시점을 맞추는 기준으로 사용했습니다. 초기 동기화가 허용 범위에 들어오기 전에는 재생 화면 노출을 대기시켰습니다.","영상·음성 차이가 0.5초 이내로 맞춰지면 재생 화면을 표시했습니다. 단순히 화면을 숨기는 것만으로 음성 재생까지 멈추는 것은 아니므로, 화면 표시와 두 요소의 재생 제어는 구분되는 작업입니다.","재생 중 차이가 0.5초 수준으로 벌어지면 버퍼링 표시를 띄우고 두 요소의 재생 시점을 다시 맞춘 뒤 재생했습니다. 당시 사용한 세부 보정 API·감시 주기·동일 경계값 처리는 공개 가능한 코드와 대조할 항목으로 남겼습니다."],
-code:"// 당시 서비스 코드를 복원한 것이 아닌 정책 의사코드입니다.\n// metadata는 서비스가 직접 저장·파싱한 값입니다.\nconst initialOffset = readCustomSyncMetadata(playlist);\n\n// 아래 함수들은 설명용 추상화이며 hls.js 기본 API가 아닙니다.\nconst videoTime = toCommonTimeline('video', video.currentTime, initialOffset);\nconst audioTime = toCommonTimeline('audio', audio.currentTime, initialOffset);\nconst drift = Math.abs(videoTime - audioTime);\n\nif (!bothTracksReady() || drift >= 0.5) {\n  showBuffering();\n  coordinatePlaybackForResync();\n  alignTracksUsingMetadata();\n  // 시점 보정·탐색 완료와 두 트랙 준비를 다시 확인\n} else {\n  showPlaybackScreen();\n  resumeBothTracksIfReady();\n}\n\n// 예시는 재개 < 0.5초 / 재동기화 >= 0.5초로 경계를 나눴습니다.\n// 실제 경계값 처리·보정 방식·반복 방지는 당시 코드 확인이 필요합니다.",
-checks:["영상 요청만 느리게 했을 때 음성 데이터의 로딩도 함께 대기하는지, 분리 전후 네트워크·버퍼·재생 이벤트를 비교합니다. 음성 로딩 개선과 실제 소리 출력 시점은 따로 측정합니다.","시간 차이의 단위·부호·기준 시점과 커스텀 태그의 저장·파싱 방식을 대조합니다. 같은 장면이 공통 타임라인에서 같은 시각을 가리키는지 확인합니다.","최초 재생, 일시정지·재개, 탐색, 화질 변경, 한쪽 버퍼 부족 뒤에 두 요소가 다시 맞춰지는지 확인합니다. Live에서는 타임스탬프 불연속과 재연결도 구분합니다.","0.5초 경계 전후의 시간 차이와 화면·음성 상태를 기록합니다. 버퍼링 표시가 반복해서 깜박이거나 한쪽만 계속 재생되는지, 보정 후 같은 위치로 반복 탐색하는지 확인합니다.","입 모양·소리 또는 플래시·클랩처럼 실제 대응하는 영상·음성으로 동기화를 확인합니다. 요소의 currentTime 차이만으로 디코딩·출력 지연까지 검증했다고 단정하지 않습니다."],
-result:"영상과 음성을 분리해 큰 영상 구간을 기다리다가 소리까지 늦어지는 현상을 완화하는 방향으로 서비스를 변경했습니다. 동시에 커스텀 메타데이터를 기준으로 초기 재생 시점을 맞추고, 0.5초 기준의 재동기화 정책을 적용해 운영했습니다. 독립 로딩 뒤 새로 생긴 동기화 책임까지 다룬 것이 핵심입니다. 소리 대기 시간 감소량이나 실측 립싱크 오차 분포는 제공되지 않아 수치 성과를 추가하지 않았습니다.",
-limits:"분리만으로 영상 버퍼링 자체가 사라지거나 전체 전송량이 줄어드는 것은 아닙니다. 두 요소는 독립적인 재생 상태를 가지므로 한쪽의 대기·탐색·자동재생 거절을 함께 다뤄야 합니다. 시작 오프셋만 저장해 두면 재생 중 모든 오차가 자동 보정되는 것도 아닙니다. 커스텀 태그는 일반 HLS 클라이언트가 자동 해석하는 표준 동기화 기능이 아니므로 서비스의 파싱·보정 로직이 필요합니다. 0.5초는 품질 기준으로는 눈에 띄는 차이일 수 있으며, 더 엄격한 재개 기준·대기 시간·복구 제한은 후속 개선으로 검토할 수 있습니다. 이 항목들을 당시 모두 구현했다고 단정하지 않습니다.",
-evidence:["확인된 경험: VOD·Live 영상/음성 분리, 별도 video/audio 요소 사용", "확인된 적용 방법: m3u8에 직접 추가한 시간 차이 메타데이터를 초기 동기화에 사용", "확인된 정책: 0.5초 기준으로 화면 표시, 버퍼링 표시와 재동기화 후 재생", "보완할 근거: 커스텀 태그명·단위·부호, FFmpeg 전후 타임스탬프, 프론트 파싱·보정 코드, 감시 주기와 경계값 처리", "보완할 결과: 영상 지연 조건에서의 음성 대기 시간과 실제 A/V 출력 오차, 재동기화 소요 시간·횟수"],
-references:[{label:"RFC 8216: HLS 미디어·동기화·확장 태그 처리",url:"https://www.rfc-editor.org/rfc/rfc8216.html"},{label:"FFmpeg: HLS 영상·음성 출력 구성",url:"https://www.ffmpeg.org/ffmpeg-formats.html"},{label:"hls.js: 재생 요소와 별도 오디오 트랙 지원",url:"https://github.com/video-dev/hls.js"},{label:"HTML 표준: 미디어 재생 시간·대기·탐색",url:"https://html.spec.whatwg.org/multipage/media.html"}],
-presentation:{titles:{context:"영상 구간의 대기가 소리에도 영향을 줬다",reasoning:"로딩은 분리해도 재생 시점은 함께 맞춰야 했다",implementation:"시간 차이 메타데이터와 화면·재생 제어",result:"분리 로딩과 재동기화 정책을 함께 적용"},reasoningIntro:"파일의 다운로드 크기와 미디어의 재생 시점은 다른 문제였습니다. 로딩 구조를 바꾸면서 생긴 시간 기준과 재생 제어의 책임을 함께 정리했습니다.",codeTitle:"커스텀 메타데이터 기반 동기화 정책",codeNote:"정책 의사코드 · 당시 구현 코드 아님",ownershipIntro:"영상·음성 분리와 서비스용 메타데이터를 이용한 동기화, 화면·버퍼링 표시 제어 경험을 기록했습니다. 세부 API와 생성 파이프라인은 당시 코드와 대조할 항목으로 남겼습니다.",highlights:[{label:"변경한 재생 구조",value:"영상 · 음성 분리",note:"별도 video / audio 요소"},{label:"화면 표시·재동기화 기준",value:"0.5초",note:"서비스의 제어 기준 · 실측 성과값과 구분"}],comparison:[{label:"BEFORE / 함께 로딩",title:"영상·음성을 담은 TS",text:"영상 구간의 로딩 대기\n당시 구성에서 소리도 함께 지연",detail:"해결 목표: 영상 대기가 음성에 미치는 영향 완화"},{label:"AFTER / 분리하고 동기화",title:"별도 요청 + 시간 차이 기준",text:"커스텀 m3u8 메타데이터로 초기 시점 정렬\n0.5초 기준으로 화면 표시 · 재동기화",detail:"감수한 비용: 두 재생 요소의 상태·시점 관리"}]}
+  "slug": "av-sync",
+  "category": "AUDIO / VIDEO SYNC",
+  "location": "FFmpeg · 커스텀 m3u8 메타데이터 → 별도 video / audio 요소",
+  "title": "영상·음성 분리 후 재생 시점 동기화",
+  "summary": "영상 구간의 로딩이 늦어질 때 음성도 지연돼 파일과 재생 요소를 분리했습니다. m3u8의 시간 차이 메타데이터로 초기 시점을 맞추고, 0.5초 기준으로 화면 표시와 재동기화를 제어했습니다.",
+  "tradeoff": "영상·음성의 독립 로딩 ↔ 두 재생 요소의 동기화 복잡도",
+  "experience": true,
+  "cardNote": "구현 경험 · 분리 로딩과 0.5초 동기화 기준",
+  "fact": "영상과 음성을 같은 TS 세그먼트에 담아 hls.js로 재생하던 구성에서, 영상 구간의 로딩이 늦어지면 음성도 지연됐습니다.",
+  "source": "당시 구현 경험을 기준으로 정리했습니다. 원본 코드와 측정 로그는 별도 확인이 필요합니다.",
+  "problem": "파일을 분리하면 영상과 음성을 따로 로드할 수 있지만, 두 재생 요소의 시작 시점과 버퍼링 후 재생 시점을 맞춰야 했습니다.",
+  "investigate": [
+    "기존 구성에서는 영상과 음성이 같은 TS 요청을 공유했습니다. 영상 구간의 다운로드 대기가 음성 로딩에도 영향을 주는 것으로 보았습니다. 네트워크·디코딩·버퍼별 기여도는 분리 측정하지 않았습니다.",
+    "파일 분리 후에는 두 요소가 서로 다른 시점에 준비됩니다. 생성 시 기록한 시간 차이로 시작 기준을 맞추고, 재생 중 발생한 차이도 별도로 확인해야 했습니다.",
+    "m3u8에 추가한 값은 서비스용 메타데이터입니다. 플레이어에서 직접 읽어 동기화 기준으로 사용했습니다."
+  ],
+  "options": [
+    {
+      "name": "영상·음성을 담은 TS 구성 유지",
+      "good": "한 재생 요소 안에서 두 트랙을 다루는 구조 유지",
+      "cost": "당시 관찰한 로딩 지연과 소리 대기 문제를 별도로 해결해야 함"
+    },
+    {
+      "name": "파일 분리 후 각 요소를 바로 재생",
+      "good": "로딩을 분리하고 먼저 준비된 데이터부터 재생 가능",
+      "cost": "시작 시점과 버퍼링 이후 영상·음성이 어긋날 수 있음"
+    },
+    {
+      "name": "파일 분리 + 시간 기준 공유 + 재동기화",
+      "good": "독립 로딩을 활용하면서 화면 노출과 어긋남에 대응",
+      "cost": "메타데이터 관리, 재생·대기·탐색 제어와 동기화 복구가 복잡해짐",
+      "selected": true
+    }
+  ],
+  "decision": "파일과 재생 요소를 분리하고, 초기 동기화와 재생 중 보정을 함께 적용했습니다. 영상·음성을 따로 로드하는 대신 두 요소의 재생 상태를 함께 제어하는 복잡도가 늘었습니다.",
+  "steps": [
+    "FFmpeg 기반 VOD·Live 생성 과정에서 영상·음성을 분리하고, 시간 차이를 커스텀 m3u8 메타데이터에 기록.",
+    "파일 로드 시 메타데이터를 읽어 별도 video/audio 요소의 초기 재생 시점 동기화.",
+    "두 요소의 시간 차이가 0.5초 이내로 맞춰지면 재생 화면 표시.",
+    "재생 중 차이가 0.5초 수준으로 벌어지면 버퍼링 표시 후 시점을 다시 맞춰 재생."
+  ],
+  "code": "// 당시 서비스 코드를 복원한 것이 아닌 정책 의사코드입니다.\n// metadata는 서비스가 직접 저장·파싱한 값입니다.\nconst initialOffset = readCustomSyncMetadata(playlist);\n\n// 아래 함수들은 설명용 추상화이며 hls.js 기본 API가 아닙니다.\nconst videoTime = toCommonTimeline('video', video.currentTime, initialOffset);\nconst audioTime = toCommonTimeline('audio', audio.currentTime, initialOffset);\nconst drift = Math.abs(videoTime - audioTime);\n\nif (!bothTracksReady() || drift >= 0.5) {\n  showBuffering();\n  coordinatePlaybackForResync();\n  alignTracksUsingMetadata();\n  // 시점 보정·탐색 완료와 두 트랙 준비를 다시 확인\n} else {\n  showPlaybackScreen();\n  resumeBothTracksIfReady();\n}\n\n// 예시는 재개 < 0.5초 / 재동기화 >= 0.5초로 경계를 나눴습니다.\n// 실제 경계값 처리·보정 방식·반복 방지는 당시 코드 확인이 필요합니다.",
+  "checks": [
+    "분리 전후 영상 요청 지연 조건에서 음성 로딩 시간과 실제 소리 출력 시점 비교.",
+    "커스텀 태그의 단위·부호·기준 시점 및 파싱·보정 코드 대조.",
+    "최초 재생·일시정지·탐색·화질 변경·버퍼 부족·재연결 후 재동기화 확인.",
+    "0.5초 경계 전후 버퍼링 반복, 한쪽만 재생되는 현상, 보정 소요 시간 확인.",
+    "클랩 등 영상·음성 대응 장면으로 실제 출력 오차 측정. currentTime 차이와 출력 지연 구분."
+  ],
+  "result": "영상·음성 분리와 메타데이터 기반 동기화를 적용했습니다. 재생 시작과 재생 중 오차에 따라 화면 표시·버퍼링·재동기화를 제어했습니다. 음성 대기 시간 감소량과 실제 출력 오차의 측정 기록을 확인하지 못해 정량적인 개선 폭은 제시하지 않습니다.",
+  "limits": "0.5초는 당시 화면 표시·재동기화 정책의 기준입니다. 실측 최대 오차나 립싱크 품질 보장값은 아닙니다. 정확한 태그명·보정 API·감시 주기·경계값 처리는 원본 코드 확인이 필요합니다.",
+  "evidence": [
+    "VOD·Live 영상·음성 분리 및 별도 video/audio 요소 연동",
+    "커스텀 m3u8 시간 차이 메타데이터를 사용한 초기 동기화",
+    "0.5초 기준 화면 표시·버퍼링·재동기화 제어"
+  ],
+  "references": [
+    {
+      "label": "RFC 8216: HLS 미디어·동기화·확장 태그 처리",
+      "url": "https://www.rfc-editor.org/rfc/rfc8216.html"
+    },
+    {
+      "label": "FFmpeg: HLS 영상·음성 출력 구성",
+      "url": "https://www.ffmpeg.org/ffmpeg-formats.html"
+    },
+    {
+      "label": "hls.js: 재생 요소와 별도 오디오 트랙 지원",
+      "url": "https://github.com/video-dev/hls.js"
+    },
+    {
+      "label": "HTML 표준: 미디어 재생 시간·대기·탐색",
+      "url": "https://html.spec.whatwg.org/multipage/media.html"
+    }
+  ]
 },{
 slug:"abr-quality-cap",category:"ABR & LIVE LATENCY",location:"미디어 처리 → LL-HLS · CDN → hls.js · 시청 기기",title:"1080p 대신, 안정적으로 이어지는 720p",summary:"ABR 적용 후 1080p 구성에서 늘어난 서버 처리 부담과 방송 지연, 저사양 기기의 발열·화면 튕김을 마주했습니다. ABR을 유지하면서 최대 720p와 비트레이트 상한을 적용해 방송-시청 지연을 3.5~4초에서 약 2.5초로 안정화했습니다.",tradeoff:"1080p의 선명도 ↔ 방송 지연 · 서버 자원 · 단말 안정성",experience:true,cardNote:"구현 경험 · 방송 지연 약 2.5초로 안정화",
 fact:"hls.js 기반 ABR을 적용한 방송 서비스에서 1080p를 포함한 구성을 시험했습니다. 서버 처리 비용이 커졌고, LL-HLS 적용 환경에서 실제 방송과 시청 화면 사이의 지연이 기존 약 2.5초에서 3.5~4초까지 증가했습니다. 저사양 기기에서는 발열과 화면 튕김도 관찰했습니다. 이후 최대 화질을 720p로 제한하고 비트레이트 상한을 적용해 방송-시청 지연을 약 2.5초 수준으로 안정화했습니다. 저사양 기기의 발열과 화면 튕김도 감소했습니다.",source:"방송 서비스 개발 회고: ABR 적용, LL-HLS 환경의 방송-시청 지연, 저사양 테스트, 720p 상한 정책. 제한 후 지연은 약 2.5초였으며, 정확한 비트레이트 상한과 반복 측정 조건은 추가 확인 항목입니다.",

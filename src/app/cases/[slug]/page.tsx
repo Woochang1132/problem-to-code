@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { cases } from "@/data/cases";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
+import AvSyncCase from "@/components/av-sync-case";
 
 
 export function generateStaticParams() { return cases.map(c => ({ slug: c.slug })); }
@@ -17,6 +18,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const c = cases.find(c => c.slug === slug);
   if (!c) notFound();
+  if (c.slug === "av-sync") return <AvSyncCase item={c} />;
   const experience = c.experience === true;
   const presentation = c.presentation;
 
